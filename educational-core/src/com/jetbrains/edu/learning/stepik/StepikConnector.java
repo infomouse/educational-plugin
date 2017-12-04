@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.lang.Language;
 import com.intellij.lang.LanguageExtensionPoint;
+import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ApplicationNamesInfo;
 import com.intellij.openapi.diagnostic.Logger;
@@ -205,7 +206,7 @@ public class StepikConnector {
                                   @NotNull List<Integer> featuredCourses) throws IOException {
     final List<RemoteCourse> courses = coursesContainer.courses;
     for (RemoteCourse info : courses) {
-      if (!info.isAdaptive() && StringUtil.isEmptyOrSpaces(info.getType())) continue;
+      if (!info.isAdaptive() && StringUtil.isEmptyOrSpaces(info.getType()) && !featuredCourses.contains(info.getId())) continue;
       StepikUtils.setCourseLanguage(info);
 
       if (canBeOpened(info)) {
@@ -282,7 +283,8 @@ public class StepikConnector {
     }
 
     if (courseInfo.isAdaptive()) {
-      return supportedLanguages.contains(courseInfo.getLanguageID());
+      return supportedLanguages.contains(courseInfo.getLanguageID()) &&
+          !courseInfo.getLanguageID().equals(JavaLanguage.INSTANCE.getDisplayName());
     }
 
     String courseType = courseInfo.getType();

@@ -1,7 +1,6 @@
 package com.jetbrains.edu.learning.editor;
 
 
-import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
@@ -24,6 +23,7 @@ import com.jetbrains.edu.learning.courseFormat.AnswerPlaceholder;
 import com.jetbrains.edu.learning.courseFormat.CheckStatus;
 import com.jetbrains.edu.learning.courseFormat.Course;
 import com.jetbrains.edu.learning.courseFormat.TaskFile;
+import com.jetbrains.edu.learning.courseFormat.tasks.CodeTask;
 import com.jetbrains.edu.learning.courseFormat.tasks.Task;
 import com.jetbrains.edu.learning.courseFormat.tasks.TheoryTask;
 import com.jetbrains.edu.learning.navigation.NavigationUtils;
@@ -33,8 +33,6 @@ import com.jetbrains.edu.learning.ui.taskDescription.TaskDescriptionToolWindowFa
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
-
-import static com.jetbrains.edu.coursecreator.actions.CCPluginToggleAction.COURSE_CREATOR_ENABLED;
 
 
 public class EduEditorFactoryListener implements EditorFactoryListener {
@@ -102,6 +100,12 @@ public class EduEditorFactoryListener implements EditorFactoryListener {
             editor.addEditorMouseListener(new WindowSelectionListener(taskFile));
           }
         }
+
+        final Task task = taskFile.getTask();
+        if (task instanceof CodeTask && !((CodeTask)task).getHasClass()) {
+          EduUtils.guardCodeTask(editor);
+        }
+
         EduLaunchesReporter.INSTANCE.sendStats(isStudyProject, PropertiesComponent.getInstance().getBoolean(COURSE_CREATOR_ENABLED));
       }
     }

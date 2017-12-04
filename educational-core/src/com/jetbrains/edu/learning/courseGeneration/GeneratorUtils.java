@@ -161,14 +161,14 @@ public class GeneratorUtils {
           "Error in Course Creation");
       return course;
     }
-    if (updateTaskFilesNeed(course)) {
+    if (updateTaskFilesNeeded(course)) {
       updateJavaCodeTaskFileNames(project, course);
     }
     StudyTaskManager.getInstance(project).setCourse(course);
     return course;
   }
 
-  private static boolean updateTaskFilesNeed(@NotNull final Course course) {
+  private static boolean updateTaskFilesNeeded(@NotNull final Course course) {
     return course instanceof RemoteCourse && course.isStudy() && EduNames.JAVA.equals(course.getLanguageID());
   }
 

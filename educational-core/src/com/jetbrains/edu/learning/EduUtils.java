@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.intellij.diff.util.DiffDrawUtil;
 import com.intellij.ide.SaveAndSyncHandler;
 import com.intellij.ide.fileTemplates.FileTemplate;
 import com.intellij.ide.fileTemplates.FileTemplateManager;
@@ -29,6 +30,8 @@ import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.editor.actionSystem.EditorActionManager;
 import com.intellij.openapi.editor.colors.EditorColors;
 import com.intellij.openapi.editor.impl.DocumentImpl;
+import com.intellij.openapi.editor.markup.HighlighterTargetArea;
+import com.intellij.openapi.editor.markup.RangeHighlighter;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -68,6 +71,7 @@ import com.intellij.util.io.zip.JBZipFile;
 import com.intellij.util.text.MarkdownUtil;
 import com.intellij.util.ui.UIUtil;
 import com.jetbrains.edu.learning.courseFormat.*;
+import com.jetbrains.edu.learning.courseFormat.tasks.CodeTask;
 import com.jetbrains.edu.learning.courseFormat.tasks.Task;
 import com.jetbrains.edu.learning.courseFormat.tasks.TaskWithSubtasks;
 import com.jetbrains.edu.learning.courseGeneration.GeneratorUtils;
@@ -102,6 +106,9 @@ import java.util.stream.Collectors;
 import static com.jetbrains.edu.learning.navigation.NavigationUtils.navigateToTask;
 
 public class EduUtils {
+
+  private static final String PROMOTED_COURSES_LINK = "https://raw.githubusercontent.com/JetBrains/educational-plugin/master/featured_courses.txt";
+  private static final String IN_PROGRESS_COURSES_LINK = "https://raw.githubusercontent.com/JetBrains/educational-plugin/ktisha/javaCourses/in_progress.txt";
 
   private EduUtils() {
   }
@@ -1204,5 +1211,45 @@ public class EduUtils {
       LOG.error(e);
     }
     return null;
+  }
+
+  @NotNull
+  public static List<Integer> getInProgressCourses() {
+    return getCoursesIds(IN_PROGRESS_COURSES_LINK);
+  }
+
+  @NotNull
+  public static List<Integer> getFeaturedCourses() {
+    return getCoursesIds(PROMOTED_COURSES_LINK);
+  }
+
+  @NotNull
+  private static List<Integer> getCoursesIds(String link) {
+    try {
+      final URL url = new URL(link);
+      URLConnection conn = url.openConnection();
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+        return reader.lines().map(s -> Integer.valueOf(s.split("#")[0].trim())).collect(Collectors.toList());
+      }
+    } catch (IOException e) {
+      LOG.warn("Failed to get promoted courses");
+    }
+    return Lists.newArrayList();
+  }
+
+  public static void guardCodeTask(@NotNull Editor editor) {
+    Document document = editor.getDocument();
+    if (document instanceof DocumentImpl) {
+      DocumentImpl documentImpl = (DocumentImpl)document;
+      final int prefixStart = document.getText().indexOf(CodeTask.JAVA_PREFIX);
+      List<RangeMarker> blocks = documentImpl.getGuardedBlocks();
+      RangeHighlighter rhPrefix = editor.getMarkupModel()
+        .addRangeHighlighter(prefixStart, prefixStart + CodeTask.JAVA_PREFIX.length() - 1, DiffDrawUtil.DEFAULT_LAYER, null, HighlighterTargetArea.LINES_IN_RANGE);
+      blocks.add(rhPrefix);
+      RangeHighlighter rhPostfix = editor.getMarkupModel()
+        .addRangeHighlighter(documentImpl.getTextLength()-CodeTask.JAVA_POSTFIX.length() + 2, documentImpl.getTextLength(),
+                             DiffDrawUtil.DEFAULT_LAYER, null, HighlighterTargetArea.LINES_IN_RANGE);
+      blocks.add(rhPostfix);
+    }
   }
 }

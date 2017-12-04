@@ -22,6 +22,7 @@ import com.jetbrains.edu.learning.courseFormat.Lesson;
 import com.jetbrains.edu.learning.courseFormat.RemoteCourse;
 import com.jetbrains.edu.learning.courseFormat.tasks.ChoiceTask;
 import com.jetbrains.edu.learning.courseFormat.tasks.Task;
+import com.jetbrains.edu.learning.courseFormat.tasks.CodeTask;
 import com.jetbrains.edu.learning.navigation.NavigationUtils;
 import com.jetbrains.edu.learning.stepic.StepikLanguages;
 import com.jetbrains.edu.learning.stepic.StepikTaskBuilder;
@@ -397,7 +398,7 @@ public class StepikAdaptiveConnector {
     return answer;
   }
 
-  public static CheckResult checkCodeTask(@NotNull Project project, @NotNull Task task, @NotNull StepicUser user) {
+  public static CheckResult checkCodeTask(@NotNull Project project, @NotNull CodeTask task, @NotNull StepicUser user) {
     int attemptId = -1;
     try {
       attemptId = getAttemptId(task);
@@ -411,7 +412,15 @@ public class StepikAdaptiveConnector {
       final Editor editor = EduUtils.getSelectedEditor(project);
       if (editor != null) {
         String commentPrefix = LanguageCommenters.INSTANCE.forLanguage(courseLanguage).getLineCommentPrefix();
-        final String answer = commentPrefix + EDU_TOOLS_COMMENT + editor.getDocument().getText();
+        String text = editor.getDocument().getText();
+        if (!task.getHasClass()) {
+          final int startIndex = text.indexOf(CodeTask.JAVA_PREFIX);
+          if (startIndex != -1) {
+            text = text.substring(startIndex + CodeTask.JAVA_PREFIX.length());
+          }
+          text = StringUtil.trimEnd(text, CodeTask.JAVA_POSTFIX);
+        }
+        final String answer = commentPrefix + EDU_TOOLS_COMMENT + text;
         String defaultLanguage = StepikLanguages.langOfId(courseLanguage.getID()).getLangName();
         assert defaultLanguage != null : ("Default Stepik language not found for: " + courseLanguage.getDisplayName());
         final StepikWrappers.SubmissionToPostWrapper submissionToPost =
