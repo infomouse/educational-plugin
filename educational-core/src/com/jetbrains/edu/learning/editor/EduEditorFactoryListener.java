@@ -1,7 +1,5 @@
 package com.jetbrains.edu.learning.editor;
 
-
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.LogicalPosition;
@@ -36,8 +34,6 @@ import java.awt.*;
 
 
 public class EduEditorFactoryListener implements EditorFactoryListener {
-  private static final Logger LOG = Logger.getInstance(EduEditorFactoryListener.class);
-
   private static class WindowSelectionListener extends EditorMouseAdapter {
     private final TaskFile myTaskFile;
 
@@ -101,7 +97,6 @@ public class EduEditorFactoryListener implements EditorFactoryListener {
           }
         }
 
-        final Task task = taskFile.getTask();
         if (task instanceof CodeTask && !((CodeTask)task).getHasClass()) {
           EduUtils.guardCodeTask(editor);
         }

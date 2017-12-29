@@ -96,6 +96,9 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -107,7 +110,6 @@ import static com.jetbrains.edu.learning.navigation.NavigationUtils.navigateToTa
 
 public class EduUtils {
 
-  private static final String PROMOTED_COURSES_LINK = "https://raw.githubusercontent.com/JetBrains/educational-plugin/master/featured_courses.txt";
   private static final String IN_PROGRESS_COURSES_LINK = "https://raw.githubusercontent.com/JetBrains/educational-plugin/ktisha/javaCourses/in_progress.txt";
 
   private EduUtils() {
@@ -1216,11 +1218,6 @@ public class EduUtils {
   @NotNull
   public static List<Integer> getInProgressCourses() {
     return getCoursesIds(IN_PROGRESS_COURSES_LINK);
-  }
-
-  @NotNull
-  public static List<Integer> getFeaturedCourses() {
-    return getCoursesIds(PROMOTED_COURSES_LINK);
   }
 
   @NotNull

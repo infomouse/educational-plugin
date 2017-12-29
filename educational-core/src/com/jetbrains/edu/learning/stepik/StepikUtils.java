@@ -15,6 +15,7 @@
  */
 package com.jetbrains.edu.learning.stepik;
 
+import com.jetbrains.edu.learning.EduNames;
 import com.jetbrains.edu.learning.courseFormat.Lesson;
 import com.jetbrains.edu.learning.courseFormat.RemoteCourse;
 import com.jetbrains.edu.learning.courseFormat.tasks.*;
@@ -28,7 +29,7 @@ public class StepikUtils {
     if (task instanceof TheoryTask) {
       finalText += "<br/><br/><b>Note</b>: This theory task aims to help you solve difficult tasks. ";
     }
-    else if (task instanceof CodeTask) {
+    else if (task instanceof CodeTask && task.getLesson().getCourse().getLanguageID().equals(EduNames.PYTHON)) {
       finalText += "<br/><br/><b>Note</b>: Use standard input to obtain input for the task.";
     }
     if (!(task instanceof EduTask) && !(task instanceof OutputTask)) {
