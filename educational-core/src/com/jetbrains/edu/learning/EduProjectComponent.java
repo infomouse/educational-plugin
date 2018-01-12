@@ -67,6 +67,7 @@ public class EduProjectComponent implements ProjectComponent {
   private FileCreatedByUserListener myListener;
   private final Map<Keymap, List<Pair<String, String>>> myDeletedShortcuts = new HashMap<>();
   private MessageBusConnection myBusConnection;
+  private String myProjectViewToSelect;
 
   private EduProjectComponent(@NotNull final Project project) {
     myProject = project;
@@ -74,11 +75,16 @@ public class EduProjectComponent implements ProjectComponent {
 
   @Override
   public void projectOpened() {
+    if (myProject.isDisposed()) {
+      return;
+    }
     StartupManager.getInstance(myProject).runWhenProjectIsInitialized(
       () -> {
-
+        if (!EduUtils.isStudyProject(myProject)) {
+          return;
+        }
         if (!ApplicationManager.getApplication().isUnitTestMode()) {
-          selectProjectView();
+          selectProjectView(ProjectViewPane.ID);
         }
 
         Course course = StudyTaskManager.getInstance(myProject).getCourse();
@@ -118,10 +124,14 @@ public class EduProjectComponent implements ProjectComponent {
     });
   }
 
-  private void selectProjectView() {
+  private void selectProjectView(@NotNull String viewId) {
     ProjectView projectView = ProjectView.getInstance(myProject);
     if (projectView != null) {
-      projectView.changeView(ProjectViewPane.ID);
+      String selectedViewId = ProjectView.getInstance(myProject).getCurrentViewId();
+      if (!viewId.equals(selectedViewId)) {
+        myProjectViewToSelect = selectedViewId;
+        projectView.changeView(viewId);
+      }
     }
     else {
       LOG.warn("Failed to select Project View");
@@ -298,6 +308,9 @@ public class EduProjectComponent implements ProjectComponent {
 
   @Override
   public void projectClosed() {
+    if (myProjectViewToSelect != null) {
+      selectProjectView(myProjectViewToSelect);
+    }
     final Course course = StudyTaskManager.getInstance(myProject).getCourse();
     if (course != null) {
       final ToolWindow toolWindow = ToolWindowManager.getInstance(myProject).getToolWindow(TaskDescriptionToolWindowFactory.STUDY_TOOL_WINDOW);
