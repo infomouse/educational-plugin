@@ -23,6 +23,7 @@ import com.jetbrains.edu.learning.stepik.StepikConnector;
 import kotlin.collections.MapsKt;
 import org.apache.commons.codec.binary.Base64;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.List;
@@ -186,6 +187,7 @@ public class GeneratorUtils {
     }
   }
 
+  @Nullable
   private static RemoteCourse getCourseFromStepik(@NotNull Project project, RemoteCourse selectedCourse) {
     return ProgressManager.getInstance().runProcessWithProgressSynchronously(() -> {
       ProgressManager.getInstance().getProgressIndicator().setIndeterminate(false);
