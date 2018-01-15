@@ -66,20 +66,26 @@ public class PyDirectoryProjectGenerator extends CourseProjectGenerator<PyNewPro
 
   public static void createStudyStructure(@NotNull final Project project, @NotNull final VirtualFile baseDir,
                                           @NotNull final Course courseInfo) {
-    final Course course = GeneratorUtils.initializeCourse(project, courseInfo);
-    ApplicationManager.getApplication().runWriteAction(() -> {
-      GeneratorUtils.createCourse(course, baseDir);
-      EduUtils.openFirstTask(course, project);
-      EduUsagesCollector.projectTypeCreated(course.isAdaptive() ? EduNames.ADAPTIVE : EduNames.STUDY);
+    final Course course;
+    try {
+      course = GeneratorUtils.initializeCourse(project, courseInfo);
+      ApplicationManager.getApplication().runWriteAction(() -> {
+        GeneratorUtils.createCourse(course, baseDir);
+        EduUtils.openFirstTask(course, project);
+        EduUsagesCollector.projectTypeCreated(course.isAdaptive() ? EduNames.ADAPTIVE : EduNames.STUDY);
 
-      if (course instanceof RemoteCourse && EduSettings.getInstance().getUser() != null) {
-        StepikSolutionsLoader stepikSolutionsLoader = StepikSolutionsLoader.getInstance(project);
-        stepikSolutionsLoader.loadSolutions(ProgressIndicatorProvider.getGlobalProgressIndicator(), course);
-        EduUsagesCollector.progressOnGenerateCourse();
-        PropertiesComponent.getInstance(project).setValue(StepikNames.ARE_SOLUTIONS_UPDATED_PROPERTY, true, false);
-      }
-      createTestHelper(project, baseDir);
-    });
+        if (course instanceof RemoteCourse && EduSettings.getInstance().getUser() != null) {
+          StepikSolutionsLoader stepikSolutionsLoader = StepikSolutionsLoader.getInstance(project);
+          stepikSolutionsLoader.loadSolutions(ProgressIndicatorProvider.getGlobalProgressIndicator(), course);
+          EduUsagesCollector.progressOnGenerateCourse();
+          PropertiesComponent.getInstance(project).setValue(StepikNames.ARE_SOLUTIONS_UPDATED_PROPERTY, true, false);
+        }
+        createTestHelper(project, baseDir);
+      });
+    }
+    catch (IOException e) {
+      LOG.error("Failed to generate course", e);
+    }
   }
 
   private void createCourseCreatorStructure(@NotNull Project project, @NotNull VirtualFile baseDir) {

@@ -11,6 +11,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.roots.ui.configuration.JdkComboBox
+import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.util.Ref
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.LocalFileSystem
@@ -45,6 +46,7 @@ open class GradleCourseProjectGenerator(
     }
     if (baseDir == null) {
       LOG.error("Couldn't find '$locationFile' in VFS")
+      Messages.showErrorDialog("Failed to generate project: project directory doesn't exist", "New Study Project")
       return null
     }
     VfsUtil.markDirtyAndRefresh(false, true, true, baseDir)
@@ -55,6 +57,7 @@ open class GradleCourseProjectGenerator(
         true
       } catch (e: IOException) {
         LOG.error("Failed to generate project with gradle", e)
+        Messages.showErrorDialog("Failed to generate project with gradle", "New Study Project")
         false
       }
     }
@@ -66,27 +69,29 @@ open class GradleCourseProjectGenerator(
     val wizard = AddModuleWizard(null, baseDir.path, gradleProjectImportProvider)
     val project = NewProjectUtil.createFromWizard(wizard, null) ?: return null
 
-    createCourseStructure(project, baseDir, projectSettings as JdkProjectSettings)
+    try {
+      createCourseStructure(project, baseDir, projectSettings as JdkProjectSettings)
+    }
+    catch (e: IOException) {
+      LOG.error("Failed to generate course", e)
+      return null
+    }
     return project
   }
 
   override fun createCourseStructure(project: Project, baseDir: VirtualFile, settings: JdkProjectSettings) {
     runWriteAction {
-      try {
-        val course = GeneratorUtils.initializeCourse(project, myCourse)
-        if (CCUtils.isCourseCreator(project)) {
-          val lesson = CCCreateLesson().createAndInitItem(course, null, EduNames.LESSON + 1, 1)
-          course.addLesson(lesson)
-          val task = CCCreateTask().createAndInitItem(course, lesson, EduNames.TASK + 1, 1)
-          lesson.addTask(task)
-          myCourseBuilder.initNewTask(task)
-        }
-        EduGradleModuleGenerator.createCourseContent(course, baseDir)
-
-        setJdk(project, settings)
-      } catch (e: IOException) {
-        LOG.error("Failed to generate course", e)
+      val course = GeneratorUtils.initializeCourse(project, myCourse)
+      if (CCUtils.isCourseCreator(project)) {
+        val lesson = CCCreateLesson().createAndInitItem(course, null, EduNames.LESSON + 1, 1)
+        course.addLesson(lesson)
+        val task = CCCreateTask().createAndInitItem(course, lesson, EduNames.TASK + 1, 1)
+        lesson.addTask(task)
+        myCourseBuilder.initNewTask(task)
       }
+      EduGradleModuleGenerator.createCourseContent(course, baseDir)
+
+      setJdk(project, settings)
     }
   }
 

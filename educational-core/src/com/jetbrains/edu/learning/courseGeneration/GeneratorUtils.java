@@ -1,8 +1,5 @@
 package com.jetbrains.edu.learning.courseGeneration;
 
-import com.intellij.ide.fileTemplates.FileTemplate;
-import com.intellij.ide.fileTemplates.FileTemplateManager;
-import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
@@ -150,9 +147,14 @@ public class GeneratorUtils {
   }
 
   @NotNull
-  public static Course initializeCourse(@NotNull Project project, @NotNull Course course) {
+  public static Course initializeCourse(@NotNull Project project, @NotNull Course course) throws IOException {
     if (course instanceof RemoteCourse) {
       course = getCourseFromStepik(project, (RemoteCourse)course);
+      if (course == null) {
+        Messages.showWarningDialog("Cannot load course from Stepik",
+                                   "New Study Project");
+        throw new IOException("Cannot load course from Stepik");
+      }
     }
     course.initCourse(false);
 
