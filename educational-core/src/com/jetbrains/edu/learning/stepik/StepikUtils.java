@@ -67,8 +67,13 @@ public class StepikUtils {
   public static void setCourseLanguage(RemoteCourse info) {
     String courseType = info.getType();
     final int separator = courseType.indexOf(" ");
-    assert separator != -1;
-    final String language = courseType.substring(separator + 1);
+    final String language;
+    if (separator == -1 && info.getName().startsWith("Java")) {  // Temporary workaround for Java Practice
+      language = "JAVA";
+    }
+    else {
+      language = courseType.substring(separator + 1);
+    }
     info.setLanguage(language);
   }
 }

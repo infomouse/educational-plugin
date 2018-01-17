@@ -1,5 +1,6 @@
 package com.jetbrains.edu.learning.editor;
 
+import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.LogicalPosition;
@@ -31,6 +32,8 @@ import com.jetbrains.edu.learning.ui.taskDescription.TaskDescriptionToolWindowFa
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+
+import static com.jetbrains.edu.coursecreator.actions.CCPluginToggleAction.COURSE_CREATOR_ENABLED;
 
 
 public class EduEditorFactoryListener implements EditorFactoryListener {
