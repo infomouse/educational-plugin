@@ -24,7 +24,7 @@ import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.platform.DirectoryProjectGenerator;
 import com.jetbrains.edu.coursecreator.CCUtils;
-import com.jetbrains.edu.coursecreator.CourseDumper;
+import com.jetbrains.edu.coursecreator.CourseInfoSynchronizer;
 import com.jetbrains.edu.learning.EduSettings;
 import com.jetbrains.edu.learning.EduUtils;
 import com.jetbrains.edu.learning.courseFormat.Course;
@@ -58,7 +58,7 @@ public abstract class CourseProjectGenerator<S> implements DirectoryProjectGener
 
   protected void afterProjectGenerated(@NotNull Project project, @NotNull S projectSettings) {
     if (CCUtils.isCourseCreator(project)) {
-      CourseDumper.INSTANCE.dumpCourse(project);
+      CourseInfoSynchronizer.INSTANCE.dumpCourseInfo(project);
     }
   }
 
