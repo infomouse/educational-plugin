@@ -187,12 +187,12 @@ public class CCProjectComponent extends AbstractProjectComponent {
         registerListener();
         EduUsagesCollector.projectTypeOpened(CCUtils.COURSE_MODE);
         Document document = FileDocumentManager.getInstance().getDocument(myProject.getBaseDir().findChild("course-info.yaml"));
-        CourseSynchronizer.INSTANCE.synchronizeCourse(myProject, document.getText());
+        CourseInfoSynchronizer.INSTANCE.synchronizeCourse(myProject, document.getText());
         document.addDocumentListener(
           new DocumentListener() {
             @Override
             public void documentChanged(DocumentEvent event) {
-              CourseSynchronizer.INSTANCE.synchronizeCourse(myProject, event.getDocument().getText());
+              CourseInfoSynchronizer.INSTANCE.synchronizeCourse(myProject, event.getDocument().getText());
             }
           });
       }

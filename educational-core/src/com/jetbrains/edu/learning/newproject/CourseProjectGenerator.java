@@ -17,6 +17,7 @@ package com.jetbrains.edu.learning.newproject;
 
 import com.intellij.facet.ui.ValidationResult;
 import com.intellij.ide.util.projectWizard.AbstractNewProjectStep;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
@@ -25,9 +26,12 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.platform.DirectoryProjectGenerator;
 import com.jetbrains.edu.coursecreator.CCUtils;
 import com.jetbrains.edu.coursecreator.CourseInfoSynchronizer;
+import com.jetbrains.edu.learning.EduNames;
 import com.jetbrains.edu.learning.EduSettings;
 import com.jetbrains.edu.learning.EduUtils;
+import com.jetbrains.edu.learning.StudyTaskManager;
 import com.jetbrains.edu.learning.courseFormat.Course;
+import com.jetbrains.edu.learning.courseFormat.Lesson;
 import com.jetbrains.edu.learning.courseFormat.RemoteCourse;
 import com.jetbrains.edu.learning.stepik.StepikConnector;
 import org.jetbrains.annotations.Nls;
@@ -59,6 +63,16 @@ public abstract class CourseProjectGenerator<S> implements DirectoryProjectGener
   protected void afterProjectGenerated(@NotNull Project project, @NotNull S projectSettings) {
     if (CCUtils.isCourseCreator(project)) {
       CourseInfoSynchronizer.INSTANCE.dumpCourseInfo(project);
+      Course course = StudyTaskManager.getInstance(project).getCourse();
+      assert course != null;
+      for (Lesson lesson : course.getLessons()) {
+        VirtualFile lessonDir = project.getBaseDir().findChild(EduNames.LESSON + lesson.getIndex());
+        if (lessonDir == null) {
+          Logger.getInstance(CourseProjectGenerator.class).error("Lesson directory for lesson " + lesson.getIndex() + " doesn't exist");
+          continue;
+        }
+        CourseInfoSynchronizer.INSTANCE.dumpLesson(lessonDir, lesson);
+      }
     }
   }
 

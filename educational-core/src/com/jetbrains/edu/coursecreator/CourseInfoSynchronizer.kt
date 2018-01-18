@@ -4,7 +4,9 @@ import com.intellij.ide.projectView.ProjectView
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.openapi.vfs.VirtualFile
 import com.jetbrains.edu.learning.StudyTaskManager
+import com.jetbrains.edu.learning.courseFormat.Lesson
 import org.yaml.snakeyaml.Yaml
 
 
@@ -15,15 +17,14 @@ object CourseInfoSynchronizer {
     val map = mapOf(Pair("name", course.name), Pair("language", course.humanLanguage),
                     Pair("programming_language", course.languageById.displayName),
                     Pair("description", course.description))
-    val dump = Yaml().dumpAsMap(map)
-    ApplicationManager.getApplication().runWriteAction {
-      val file = project.baseDir.findOrCreateChildData(CourseInfoSynchronizer.javaClass, "course-info.yaml")
-      VfsUtil.saveText(file, dump)
-    }
+    dumpData(map, project.baseDir, "course-info.yaml")
   }
-}
 
-object CourseSynchronizer {
+  fun dumpLesson(lessonDir: VirtualFile, lesson: Lesson) {
+    dumpData(mapOf(Pair("name", lesson.name), Pair("position", lesson.index)), lessonDir, "lesson-info.yaml")
+  }
+
+
   fun synchronizeCourse(project: Project, courseInfo: String) {
     val course = StudyTaskManager.getInstance(project).course!!
     val courseProperties = Yaml().loadAs(courseInfo, Map::class.java)
@@ -31,4 +32,11 @@ object CourseSynchronizer {
     ProjectView.getInstance(project).refresh()
   }
 
+  private fun dumpData(data: Map<String, Any>, dir: VirtualFile, fileName: String) {
+    val dump = Yaml().dumpAsMap(data)
+    ApplicationManager.getApplication().runWriteAction {
+      val file = dir.findOrCreateChildData(CourseInfoSynchronizer.javaClass, fileName)
+      VfsUtil.saveText(file, dump)
+    }
+  }
 }

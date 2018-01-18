@@ -3,6 +3,7 @@ package com.jetbrains.edu.coursecreator.actions;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.Function;
+import com.jetbrains.edu.coursecreator.CourseInfoSynchronizer;
 import com.jetbrains.edu.learning.EduConfigurator;
 import com.jetbrains.edu.learning.EduConfiguratorManager;
 import com.jetbrains.edu.learning.EduNames;
@@ -49,7 +50,11 @@ public class CCCreateLesson extends CCCreateStudyItemActionBase<Lesson> {
     if (configurator == null) {
       return null;
     }
-    return configurator.getCourseBuilder().createLessonContent(project, item, parentDirectory);
+    VirtualFile lessonDir = configurator.getCourseBuilder().createLessonContent(project, item, parentDirectory);
+    if (lessonDir != null) {
+      CourseInfoSynchronizer.INSTANCE.dumpLesson(lessonDir, item);
+    }
+    return lessonDir;
   }
 
   @Override
