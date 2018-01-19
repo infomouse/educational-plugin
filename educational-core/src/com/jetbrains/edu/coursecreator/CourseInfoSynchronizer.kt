@@ -7,6 +7,7 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.jetbrains.edu.learning.StudyTaskManager
 import com.jetbrains.edu.learning.courseFormat.Lesson
+import com.jetbrains.edu.learning.courseFormat.tasks.Task
 import org.yaml.snakeyaml.Yaml
 
 
@@ -14,14 +15,20 @@ object CourseInfoSynchronizer {
 
   fun dumpCourseInfo(project: Project) {
     val course = StudyTaskManager.getInstance(project).course!!
-    val map = mapOf(Pair("name", course.name), Pair("language", course.humanLanguage),
-                    Pair("programming_language", course.languageById.displayName),
-                    Pair("description", course.description))
+    val lessonNames = course.lessons.sortedBy { it.index }.map { it.name }
+    val map = mapOf<String, Any>(Pair("name", course.name), Pair("language", course.humanLanguage),
+                                 Pair("programming_language", course.languageById.displayName),
+                                 Pair("description", course.description),
+                                 Pair("lessons", lessonNames))
     dumpData(map, project.baseDir, "course-info.yaml")
   }
 
   fun dumpLesson(lessonDir: VirtualFile, lesson: Lesson) {
     dumpData(mapOf(Pair("name", lesson.name), Pair("position", lesson.index)), lessonDir, "lesson-info.yaml")
+  }
+
+  fun dumpTask(taskDir: VirtualFile, task: Task) {
+    dumpData(mapOf(Pair("name", task.name), Pair("position", task.index), Pair("type", task.taskType)), taskDir, "task-info.yaml")
   }
 
 

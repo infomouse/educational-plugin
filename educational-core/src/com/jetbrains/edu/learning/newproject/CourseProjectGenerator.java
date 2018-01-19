@@ -33,6 +33,7 @@ import com.jetbrains.edu.learning.StudyTaskManager;
 import com.jetbrains.edu.learning.courseFormat.Course;
 import com.jetbrains.edu.learning.courseFormat.Lesson;
 import com.jetbrains.edu.learning.courseFormat.RemoteCourse;
+import com.jetbrains.edu.learning.courseFormat.tasks.Task;
 import com.jetbrains.edu.learning.stepik.StepikConnector;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
@@ -68,10 +69,18 @@ public abstract class CourseProjectGenerator<S> implements DirectoryProjectGener
       for (Lesson lesson : course.getLessons()) {
         VirtualFile lessonDir = project.getBaseDir().findChild(EduNames.LESSON + lesson.getIndex());
         if (lessonDir == null) {
-          Logger.getInstance(CourseProjectGenerator.class).error("Lesson directory for lesson " + lesson.getIndex() + " doesn't exist");
+          Logger.getInstance(CourseProjectGenerator.class).error("Directory for lesson " + lesson.getIndex() + " doesn't exist");
           continue;
         }
         CourseInfoSynchronizer.INSTANCE.dumpLesson(lessonDir, lesson);
+        for (Task task : lesson.getTaskList()) {
+          VirtualFile taskDir = lessonDir.findChild(EduNames.TASK + task.getIndex());
+          if (taskDir == null) {
+            Logger.getInstance(CourseProjectGenerator.class).error("Directory for task " + task.getIndex() + " doesn't exist");
+            continue;
+          }
+          CourseInfoSynchronizer.INSTANCE.dumpTask(taskDir, task);
+        }
       }
     }
   }

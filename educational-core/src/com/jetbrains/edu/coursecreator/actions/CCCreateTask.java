@@ -5,6 +5,7 @@ import com.intellij.ide.fileTemplates.FileTemplateManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.Function;
+import com.jetbrains.edu.coursecreator.CourseInfoSynchronizer;
 import com.jetbrains.edu.coursecreator.settings.CCSettings;
 import com.jetbrains.edu.learning.EduConfigurator;
 import com.jetbrains.edu.learning.EduConfiguratorManager;
@@ -57,10 +58,14 @@ public class CCCreateTask extends CCCreateStudyItemActionBase<Task> {
   protected VirtualFile createItemDir(@NotNull final Project project, @NotNull final Task item,
                                       @NotNull final VirtualFile parentDirectory, @NotNull final Course course) {
     EduConfigurator configurator = EduConfiguratorManager.forLanguage(course.getLanguageById());
-    if (configurator != null) {
-      return configurator.getCourseBuilder().createTaskContent(project, item, parentDirectory, course);
+    if (configurator == null) {
+      return null;
     }
-    return null;
+    VirtualFile taskDir = configurator.getCourseBuilder().createTaskContent(project, item, parentDirectory, course);
+    if (taskDir != null) {
+      CourseInfoSynchronizer.INSTANCE.dumpTask(taskDir, item);
+    }
+    return taskDir;
   }
 
   @Override
