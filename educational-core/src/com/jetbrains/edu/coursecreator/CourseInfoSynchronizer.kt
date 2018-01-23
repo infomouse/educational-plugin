@@ -5,6 +5,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
+import com.jetbrains.edu.learning.EduNames
 import com.jetbrains.edu.learning.StudyTaskManager
 import com.jetbrains.edu.learning.courseFormat.Lesson
 import com.jetbrains.edu.learning.courseFormat.tasks.Task
@@ -43,6 +44,25 @@ object CourseInfoSynchronizer {
     val course = StudyTaskManager.getInstance(project).course!!
     val courseProperties = Yaml().loadAs(courseInfo, Map::class.java)
     course.name = courseProperties["name"] as String
+    val newLessonNames = courseProperties["lessons"] as List<*>
+    for ((i, lesson) in course.lessons.withIndex()) {
+      lesson.name = newLessonNames[i] as String
+    }
+    ProjectView.getInstance(project).refresh()
+  }
+
+  fun synchronizeLesson(project: Project, lessonDir: VirtualFile) {
+    if (project.isDisposed) {
+      return
+    }
+    val index = Integer.valueOf(lessonDir.name.substring(EduNames.LESSON.length)) - 1
+    val lesson = StudyTaskManager.getInstance(project).course!!.lessons[index]
+    val lessonInfo = VfsUtil.loadText(lessonDir.findChild(LESSON_CONFIG)!!)
+    val lessonProperties = Yaml().loadAs(lessonInfo, Map::class.java)
+    val newTaskNames = lessonProperties["tasks"] as List<*>
+    for ((i, task) in lesson.taskList.withIndex()) {
+      task.name = newTaskNames[i] as String
+    }
     ProjectView.getInstance(project).refresh()
   }
 

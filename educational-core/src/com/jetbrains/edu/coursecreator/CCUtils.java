@@ -316,6 +316,10 @@ public class CCUtils {
             LOG.error("Failed to synchronize course", e);
           }
         }
+
+        if (event.getFile().getName().equals(CourseInfoSynchronizer.LESSON_CONFIG)) {
+          CourseInfoSynchronizer.INSTANCE.synchronizeLesson(project, event.getFile().getParent());
+        }
       }
     }, project);
   }
