@@ -13,17 +13,11 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.io.FileUtilRt;
-import com.intellij.openapi.vfs.VfsUtilCore;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.VirtualFileVisitor;
+import com.intellij.openapi.vfs.*;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.util.Function;
 import com.intellij.util.containers.hash.HashMap;
-import com.jetbrains.edu.learning.EduConfigurator;
-import com.jetbrains.edu.learning.EduConfiguratorManager;
-import com.jetbrains.edu.learning.StudyTaskManager;
-import com.jetbrains.edu.learning.EduUtils;
-import com.jetbrains.edu.learning.EduNames;
+import com.jetbrains.edu.learning.*;
 import com.jetbrains.edu.learning.courseFormat.Course;
 import com.jetbrains.edu.learning.courseFormat.Lesson;
 import com.jetbrains.edu.learning.courseFormat.StudyItem;
@@ -307,5 +301,22 @@ public class CCUtils {
     lesson.addTask(task);
     lesson.setIndex(course.getLessons().size());
     return lesson;
+  }
+
+  public static void addListenersToConfigFiles(@NotNull Project project) {
+    VirtualFile courseConfigFile = project.getBaseDir().findChild(CourseInfoSynchronizer.COURSE_INFO_CONFIG);
+    VirtualFileManager.getInstance().addVirtualFileListener(new VirtualFileListener() {
+      @Override
+      public void contentsChanged(@NotNull VirtualFileEvent event) {
+        if (event.getFile().equals(courseConfigFile)) {
+          try {
+            CourseInfoSynchronizer.INSTANCE.synchronizeCourse(project, VfsUtilCore.loadText(courseConfigFile));
+          }
+          catch (IOException e) {
+            LOG.error("Failed to synchronize course", e);
+          }
+        }
+      }
+    }, project);
   }
 }

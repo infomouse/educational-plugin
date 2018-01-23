@@ -6,10 +6,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.LogicalPosition;
-import com.intellij.openapi.editor.event.EditorFactoryEvent;
-import com.intellij.openapi.editor.event.EditorFactoryListener;
-import com.intellij.openapi.editor.event.EditorMouseAdapter;
-import com.intellij.openapi.editor.event.EditorMouseEvent;
+import com.intellij.openapi.editor.event.*;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
@@ -17,6 +14,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.problems.WolfTheProblemSolver;
+import com.jetbrains.edu.coursecreator.CourseInfoSynchronizer;
 import com.jetbrains.edu.learning.EduDocumentListener;
 import com.jetbrains.edu.learning.EduUtils;
 import com.jetbrains.edu.learning.StudyTaskManager;
@@ -73,6 +71,16 @@ public class EduEditorFactoryListener implements EditorFactoryListener {
     final Document document = editor.getDocument();
     final VirtualFile openedFile = FileDocumentManager.getInstance().getFile(document);
     if (openedFile != null) {
+      if (CourseInfoSynchronizer.COURSE_INFO_CONFIG.equals(openedFile.getName())) {
+        document.addDocumentListener(new DocumentListener() {
+          @Override
+          public void documentChanged(DocumentEvent event) {
+            CourseInfoSynchronizer.INSTANCE.synchronizeCourse(project, document.getText());
+          }
+        });
+        return;
+      }
+
       final TaskFile taskFile = EduUtils.getTaskFile(project, openedFile);
       if (taskFile != null) {
         WolfTheProblemSolver.getInstance(project).clearProblems(openedFile);

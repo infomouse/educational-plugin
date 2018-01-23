@@ -4,10 +4,6 @@ import com.intellij.ide.util.projectWizard.ModuleBuilder;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.AbstractProjectComponent;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.event.DocumentEvent;
-import com.intellij.openapi.editor.event.DocumentListener;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.ModifiableModuleModel;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
@@ -186,15 +182,7 @@ public class CCProjectComponent extends AbstractProjectComponent {
       if (CCUtils.isCourseCreator(myProject)) {
         registerListener();
         EduUsagesCollector.projectTypeOpened(CCUtils.COURSE_MODE);
-        Document document = FileDocumentManager.getInstance().getDocument(myProject.getBaseDir().findChild("course-info.yaml"));
-        CourseInfoSynchronizer.INSTANCE.synchronizeCourse(myProject, document.getText());
-        document.addDocumentListener(
-          new DocumentListener() {
-            @Override
-            public void documentChanged(DocumentEvent event) {
-              CourseInfoSynchronizer.INSTANCE.synchronizeCourse(myProject, event.getDocument().getText());
-            }
-          });
+        CCUtils.addListenersToConfigFiles(myProject);
       }
     });
   }
