@@ -12,7 +12,9 @@ import org.yaml.snakeyaml.Yaml
 
 
 object CourseInfoSynchronizer {
-  const val COURSE_INFO_CONFIG = "course-info.yaml"
+  const val COURSE_CONFIG = "course-info.yaml"
+  const val LESSON_CONFIG = "lesson-info.yaml"
+  const val TASK_CONFIG = "task-info.yaml"
 
   fun dumpCourseInfo(project: Project) {
     val course = StudyTaskManager.getInstance(project).course!!
@@ -21,16 +23,16 @@ object CourseInfoSynchronizer {
                                  Pair("programming_language", course.languageById.displayName),
                                  Pair("description", course.description),
                                  Pair("lessons", lessonNames))
-    dumpData(map, project.baseDir, COURSE_INFO_CONFIG)
+    dumpData(map, project.baseDir, COURSE_CONFIG)
   }
 
   fun dumpLesson(lessonDir: VirtualFile, lesson: Lesson) {
     val tasks = lesson.getTaskList().sortedBy { it.index }.map { it.name }
-    dumpData(mapOf(Pair("tasks", tasks)), lessonDir, "lesson-info.yaml")
+    dumpData(mapOf(Pair("tasks", tasks)), lessonDir, LESSON_CONFIG)
   }
 
   fun dumpTask(taskDir: VirtualFile, task: Task) {
-    dumpData(mapOf(Pair("type", task.taskType)), taskDir, "task-info.yaml")
+    dumpData(mapOf(Pair("type", task.taskType)), taskDir, TASK_CONFIG)
   }
 
 

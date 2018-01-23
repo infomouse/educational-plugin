@@ -71,7 +71,7 @@ public class EduEditorFactoryListener implements EditorFactoryListener {
     final Document document = editor.getDocument();
     final VirtualFile openedFile = FileDocumentManager.getInstance().getFile(document);
     if (openedFile != null) {
-      if (CourseInfoSynchronizer.COURSE_INFO_CONFIG.equals(openedFile.getName())) {
+      if (CourseInfoSynchronizer.COURSE_CONFIG.equals(openedFile.getName())) {
         document.addDocumentListener(new DocumentListener() {
           @Override
           public void documentChanged(DocumentEvent event) {

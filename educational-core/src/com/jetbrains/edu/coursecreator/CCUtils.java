@@ -304,7 +304,7 @@ public class CCUtils {
   }
 
   public static void addListenersToConfigFiles(@NotNull Project project) {
-    VirtualFile courseConfigFile = project.getBaseDir().findChild(CourseInfoSynchronizer.COURSE_INFO_CONFIG);
+    VirtualFile courseConfigFile = project.getBaseDir().findChild(CourseInfoSynchronizer.COURSE_CONFIG);
     VirtualFileManager.getInstance().addVirtualFileListener(new VirtualFileListener() {
       @Override
       public void contentsChanged(@NotNull VirtualFileEvent event) {
