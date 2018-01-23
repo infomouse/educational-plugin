@@ -24,11 +24,12 @@ object CourseInfoSynchronizer {
   }
 
   fun dumpLesson(lessonDir: VirtualFile, lesson: Lesson) {
-    dumpData(mapOf(Pair("name", lesson.name), Pair("position", lesson.index)), lessonDir, "lesson-info.yaml")
+    val tasks = lesson.getTaskList().sortedBy { it.index }.map { it.name }
+    dumpData(mapOf(Pair("tasks", tasks)), lessonDir, "lesson-info.yaml")
   }
 
   fun dumpTask(taskDir: VirtualFile, task: Task) {
-    dumpData(mapOf(Pair("name", task.name), Pair("position", task.index), Pair("type", task.taskType)), taskDir, "task-info.yaml")
+    dumpData(mapOf(Pair("type", task.taskType)), taskDir, "task-info.yaml")
   }
 
 
