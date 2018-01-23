@@ -54,6 +54,7 @@ public class CCCreateLesson extends CCCreateStudyItemActionBase<Lesson> {
     if (lessonDir != null) {
       CourseInfoSynchronizer.INSTANCE.dumpLesson(lessonDir, item);
     }
+    CourseInfoSynchronizer.INSTANCE.dumpCourseInfo(project);
     return lessonDir;
   }
 
