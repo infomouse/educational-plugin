@@ -11,6 +11,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
@@ -24,7 +25,6 @@ import com.jetbrains.edu.learning.courseFormat.Lesson;
 import com.jetbrains.edu.learning.courseFormat.RemoteCourse;
 import com.jetbrains.edu.learning.courseFormat.tasks.Task;
 import com.jetbrains.edu.learning.stepik.*;
-import com.jetbrains.edu.learning.serialization.SerializationUtils;
 import com.jetbrains.edu.learning.stepic.serialization.StepikSubmissionAnswerPlaceholderAdapter;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -140,6 +140,8 @@ public class CCStepikConnector {
         }
         position += 1;
       }
+
+      ApplicationManager.getApplication().invokeAndWait(() -> FileDocumentManager.getInstance().saveAllDocuments());
       ApplicationManager.getApplication().runReadAction(() -> postAdditionalFiles(course, project, courseOnRemote.getId()));
       StudyTaskManager.getInstance(project).setCourse(courseOnRemote);
       showNotification(project, "Course published");
@@ -324,6 +326,7 @@ public class CCStepikConnector {
       }
       final RemoteCourse postedCourse = new Gson().fromJson(responseString, StepikWrappers.CoursesContainer.class).courses.get(0);
       updateLessons(course, project);
+      ApplicationManager.getApplication().invokeAndWait(() -> FileDocumentManager.getInstance().saveAllDocuments());
       if (!updateAdditionalMaterials(project, course, postedCourse.getSections())) {
         postAdditionalFiles(course, project, course.getId());
       }
