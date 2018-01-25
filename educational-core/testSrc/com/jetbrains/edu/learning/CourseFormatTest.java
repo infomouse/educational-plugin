@@ -11,8 +11,8 @@ import com.jetbrains.edu.learning.courseFormat.TaskFile;
 import com.jetbrains.edu.learning.courseFormat.tasks.EduTask;
 import com.jetbrains.edu.learning.courseFormat.tasks.Task;
 import com.jetbrains.edu.learning.courseFormat.tasks.TaskWithSubtasks;
-import com.jetbrains.edu.learning.stepik.StepikNames;
 import com.jetbrains.edu.learning.serialization.SerializationUtils;
+import com.jetbrains.edu.learning.stepik.StepikNames;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Rule;
 import org.junit.Test;
@@ -80,7 +80,7 @@ public class CourseFormatTest {
     assertTrue(task instanceof EduTask);
     EduTask eduTask = (EduTask) task;
 
-    assertEquals("First task description", eduTask.getTaskDescription(false));
+    assertEquals("First task description", eduTask.getTaskDescription(false, null));
   }
 
   @Test

@@ -46,7 +46,6 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.io.FileUtilRt;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.*;
 import com.intellij.openapi.vfs.newvfs.NewVirtualFile;
 import com.intellij.openapi.vfs.newvfs.impl.VirtualDirectoryImpl;
@@ -65,7 +64,6 @@ import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.io.ZipUtil;
 import com.intellij.util.io.zip.JBZipEntry;
 import com.intellij.util.io.zip.JBZipFile;
-import com.intellij.util.text.MarkdownUtil;
 import com.intellij.util.ui.UIUtil;
 import com.jetbrains.edu.learning.courseFormat.*;
 import com.jetbrains.edu.learning.courseFormat.tasks.Task;
@@ -81,8 +79,14 @@ import com.jetbrains.edu.learning.stepik.StepikUserWidget;
 import com.jetbrains.edu.learning.twitter.TwitterPluginConfigurator;
 import com.jetbrains.edu.learning.ui.taskDescription.TaskDescriptionToolWindow;
 import com.jetbrains.edu.learning.ui.taskDescription.TaskDescriptionToolWindowFactory;
-import com.petebevin.markdown.MarkdownProcessor;
 import org.apache.commons.codec.binary.Base64;
+import org.intellij.markdown.IElementType;
+import org.intellij.markdown.ast.ASTNode;
+import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor;
+import org.intellij.markdown.html.GeneratingProvider;
+import org.intellij.markdown.html.HtmlGenerator;
+import org.intellij.markdown.parser.LinkMap;
+import org.intellij.markdown.parser.MarkdownParser;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -92,6 +96,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.net.URI;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -392,7 +397,7 @@ public class EduUtils {
     if (task == null || task.getLesson() == null || task.getLesson().getCourse() == null) {
       return null;
     }
-    String text = task.getTaskDescription() != null ? task.getTaskDescription() : getTaskTextByTaskName(task, taskDirectory);
+    String text = task.getTaskDescription(taskDirectory) != null ? task.getTaskDescription(taskDirectory) : getTaskTextByTaskName(task, taskDirectory);
 
     if (text == null) return null;
 
@@ -424,7 +429,7 @@ public class EduUtils {
     }
 
     String taskTextFromMd = getTextByTaskFileFormat(task, taskDirectory, EduNames.TASK_MD);
-    return convertToHtml(taskTextFromMd);
+    return convertToHtml(taskTextFromMd, taskDirectory);
   }
 
   @Nullable
@@ -627,15 +632,25 @@ public class EduUtils {
   }
 
   @Nullable
-  public static String convertToHtml(@Nullable final String content) {
+  public static String convertToHtml(@Nullable final String content, @NotNull VirtualFile virtualFile) {
     if (content == null) return null;
-    ArrayList<String> lines = ContainerUtil.newArrayList(content.split("\n|\r|\r\n"));
+
     if (isHtml(content)) {
       return content;
     }
-    MarkdownUtil.replaceHeaders(lines);
-    MarkdownUtil.replaceCodeBlock(lines);
-    return new MarkdownProcessor().markdown(StringUtil.join(lines, "\n"));
+    return generateMarkdownHtml(virtualFile, content);
+  }
+
+  @NotNull
+  public static String generateMarkdownHtml(@NotNull VirtualFile parent, @NotNull String text) {
+    final URI baseUri = new File(parent.getPath()).toURI();
+
+    GFMFlavourDescriptor flavour = new GFMFlavourDescriptor();
+    final ASTNode parsedTree = new MarkdownParser(flavour).buildMarkdownTreeFromString(text);
+    final Map<IElementType, GeneratingProvider> htmlGeneratingProviders =
+      flavour.createHtmlGeneratingProviders(LinkMap.Builder.buildLinkMap(parsedTree, text), baseUri);
+
+    return new HtmlGenerator(text, parsedTree, htmlGeneratingProviders, true).generateHtml();
   }
 
   private static boolean isHtml(@NotNull String content) {
