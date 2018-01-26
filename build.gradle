@@ -55,7 +55,6 @@ allprojects {
     repositories {
         mavenCentral()
         maven { url 'http://dl.bintray.com/jetbrains/markdown' }
-        flatDir { dirs 'lib' }
     }
 
     intellij {
